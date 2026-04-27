@@ -8,6 +8,7 @@ SAMPLES_DIR=$(BASE_DIR)/samples
 DEPS_DIR=$(BASE_DIR)/deps
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
 SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
+SAMPLE_NAMES=$(subst $(SAMPLES_DIR)/,,$(SAMPLES_SRCS:.cpp=))
 
 GEN_INCLUDES=$(BUILD_DIR)/gen_headers/gen/compiler_headers.h
 INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(GEN_INCLUDES)

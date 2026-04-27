@@ -1,6 +1,6 @@
 # Actual rules for building the library and the executables
-.SECONDARY: $(BUILD_DIR)/%.o 
-.SECONDARY: $(BUILD_DIR)/samples/%.o 
+.PRECIOUS: $(BUILD_DIR)/%.o 
+.PRECIOUS: $(BUILD_DIR)/samples/%.o 
 
 $(BUILD_DIR)/gen_headers/gen/compiler_headers.h:
 	@mkdir -p $(@D)
@@ -27,9 +27,15 @@ $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY) $(DEPS_LIST)
 	@mkdir -p $(@D)
 	$(CXXLDV) -o $@ $< $(LINKER_FLAGS)
 
+
+# Extra rules to simply compile the samples by name
+$(SAMPLE_NAMES): sample%: $(BUILD_DIR)/sample%
+
 .PHONY: executables
 executables: $(SAMPLES)
 
+.PHONY: lib
+lib: $(LIBRARY)
 
 -include $(LIBRARY_OBJS:.o=.d)
 -include $(SAMPLE_OBJS:.o=.d)
