@@ -15,7 +15,7 @@ BuildIt is available opensource on GitHub under the MIT license. Many more sampl
 
 ## Key Features
 **1. A portable light-weight multi-stage library that can be used with any standard C++ compiler.**
-```
+```cpp
 #include <builder/dyn_var.h>
 #include <builder/static_var.h>
 ...
@@ -23,21 +23,21 @@ BuildIt is available opensource on GitHub under the MIT license. Many more sampl
 ```
 
 **2. Write expressions and statements with dyn_var<T> variables to generate the same code. Easily port a high-performance library into a compiler by changing types of variables.**
-```
+```cpp
 // Code written with dyn_var<T>
 for (dyn_var<int> i = 0; i < 512; i = i + 1) {
   A[i] = 0;
 }
 ```
 // Generates the same code
-```
+```cpp
 for (int var1 = 0; var1 < 512; var1 = var1 + 1) {
   var0[var1] = 0;
 }
 ```
 
 **3. Use conditions and expressions on static_var<T> to specialize generated code for high-performance.**
-```
+```cpp
 static_var<int> bound, block_size;
 ...
 // Splitting of loop with known bounds
@@ -55,7 +55,7 @@ if (bound % block_size != 0) {
 ```
 
 **4. Supports generation of parallel code for CPUs and GPUs with simple annotations**
-```
+```cpp
 builder::annotate("pragma: omp parallel for");
 for (dyn_var<int> i = 0; i < 512; i = i + 1) {
   A[i] = 0;
@@ -80,6 +80,10 @@ To run the samples provided with the library (that also serve as simple test cas
     make run
  
 The make system will report the first failing test case if any. 
+
+To build just the library without having to build all the samples, run 
+
+    make lib
 
 BuildIt is currently under active development. More features are being added to the framework to make building DSLs easy. If you notice BuildIt not functioning correctly on certain inputs, please create an issue with the code snippet and expected behavior.
 
