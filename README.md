@@ -4,7 +4,7 @@
 <p align="center"><img src="https://intimeand.space/images/logo-buildit.png" width="400"></p>
 <p align="center">"Every problem in Computer Science can be solved with a level of indirection and every problem in Software Engineering can be solved with a step of code-generation"</p>
 
-[BuildIt](https://buildit.so) is a a framework for rapidly developing high-performance Domain Specific Languages (DSLs) with little to no compiler knowledge. A lightweight type-based multi-stage programming framework in C++ that supports generating expresisons and rich data-dependent control flow like if-then-else conditions and for and while loops using its novel re-execution strategy for a variety of targets.
+[BuildIt](https://buildit.so) is a framework for rapidly developing high-performance Domain Specific Languages (DSLs) with little to no compiler knowledge. A lightweight type-based multi-stage programming framework in C++ that supports generating expresisons and rich data-dependent control flow like if-then-else conditions and for and while loops using its novel re-execution strategy for a variety of targets.
 
 ## Some completed and WIP projects with BuildIt
 1. [NetBlocks](https://github.com/BuildIt-lang/net-blocks): A Performant, customizable and modular network stack to specialize protocols and implementations
