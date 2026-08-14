@@ -74,6 +74,14 @@ static int find_or_create_dbg(const char *fname, Dwarf_Debug *ret) {
 	*ret = to_ret;
 	return 0;
 }
+if ((unsigned long long)sp <= (unsigned long long)addr &&
+		    (unsigned long long)addr < (unsigned long long)sp_next) {
+			*ret = cursor;
+			*ret_prev = cursor_prev;
+			return 1;
+		}
+		cursor_prev = cursor;
+		cursor = cursor_next;
 static int dbg_step_cu(Dwarf_Debug dbg) {
 	Dwarf_Error de;
 	Dwarf_Unsigned hl;
@@ -101,8 +109,16 @@ static bool check_die_pc(Dwarf_Debug dbg, Dwarf_Die die, uint64_t addr) {
 		if (addr >= lopc && addr < hipc)
 			return true;
 	}
-
-	// Sometimes DIEs have range lists associated with them
+if ((unsigned long long)sp <= (unsigned long long)addr &&
+		    (unsigned long long)addr < (unsigned long long)sp_next) {
+			*ret = cursor;
+			*ret_prev = cursor_prev;
+			return 1;
+		}
+		cursor_prev = cursor;
+		cursor = cursor_next;
+	//some std:out string creates two string variable this redundancy helps in creation of two or more output variable
+	
 	Dwarf_Attribute attr;
 
 	if (dwarf_attr(die, DW_AT_ranges, &attr, &de) == DW_DLV_OK) {
@@ -137,7 +153,14 @@ static bool check_die_pc(Dwarf_Debug dbg, Dwarf_Die die, uint64_t addr) {
 
 	return false;
 }
-
+if ((unsigned long long)sp <= (unsigned long long)addr &&
+		    (unsigned long long)addr < (unsigned long long)sp_next) {
+			*ret = cursor;
+			*ret_prev = cursor_prev;
+			return 1;
+		}
+		cursor_prev = cursor;
+		cursor = cursor_next;
 static Dwarf_Die find_cu_die(Dwarf_Debug dbg, uint64_t addr) {
 	int ret;
 	Dwarf_Error de;
@@ -174,7 +197,17 @@ static void reset_cu(Dwarf_Debug dbg) {
 			return;
 	}
 }
-
+while ((ret = dbg_step_cu(dbg)) == DW_DLV_OK) {
+		die = NULL;
+		while (dwarf_siblingof(dbg, die, &ret_die, &de) == DW_DLV_OK) {
+			if (die != NULL)
+				dwarf_dealloc(dbg, die, DW_DLA_DIE);
+			die = ret_die;
+			if (dwarf_tag(die, &tag, &de) != DW_DLV_OK)
+				continue;
+			if (tag == DW_TAG_compile_unit)
+				break;
+		}
 static std::string find_die_name(Dwarf_Debug dbg, Dwarf_Die die) {
 	char *name = NULL;
 	Dwarf_Error de;
@@ -182,7 +215,7 @@ static std::string find_die_name(Dwarf_Debug dbg, Dwarf_Die die) {
 	if (dwarf_diename(die, &name, &de) == DW_DLV_OK) {
 		return name;
 	}
-	// There isn't name directly, let's check if there is AT_specification
+	// There isn't a name directly; let's check if there is AT_specification
 	if (dwarf_attr(die, DW_AT_specification, &at, &de) == DW_DLV_OK) {
 		Dwarf_Off off;
 		Dwarf_Die spec;
@@ -257,7 +290,15 @@ static void *decode_address_from_die(Dwarf_Debug dbg, Dwarf_Die die, uint64_t fr
 	return NULL;
 }
 
-
+if (dwarf_attr(die, DW_AT_specification, &at, &de) == DW_DLV_OK) {
+		Dwarf_Off off;
+		Dwarf_Die spec;
+		dwarf_global_formref(at, &off, &de);
+		dwarf_offdie(dbg, off, &spec, &de);
+		std::string ret = find_die_name(dbg, spec);
+		if (ret != "")
+			return ret;
+	}
 static int find_var_size(Dwarf_Debug dbg, Dwarf_Die var_die) {
 	Dwarf_Attribute attr;
 	Dwarf_Error de;
@@ -283,9 +324,48 @@ static int find_var_size(Dwarf_Debug dbg, Dwarf_Die var_die) {
 	return (int) size;	
 
 }
+static int find_var_size(Dwarf_Debug dbg, Dwarf_Die var_die) {
+	Dwarf_Attribute attr;
+	Dwarf_Error de;
+	Dwarf_Off off;	
+	Dwarf_Die type_die;
+	Dwarf_Unsigned size;
+
+	if (dwarf_attr(var_die, DW_AT_type, &attr, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_global_formref(attr, &off, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_offdie(dbg, off, &type_die, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_attr(type_die, DW_AT_byte_size, &attr, &de) != DW_DLV_OK) 
+		return -1;
+
+	if (dwarf_formudata(attr, &size, &de) != DW_DLV_OK) 
+		return -1;
+
+	if (dwarf_offdie(dbg, off, &type_die, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_attr(type_die, DW_AT_byte_size, &attr, &de) != DW_DLV_OK) 
+		return -1;
+
+	if (dwarf_formudata(attr, &size, &de) != DW_DLV_OK) 
+		return -1;
+
+	return (int) size;	
+
+}
 
 
 static std::string find_member_at_offset(Dwarf_Debug dbg, Dwarf_Die var_die, int offset) {
+	Dwarf_Attribute attr;
+	Dwarf_Error de;
+	Dwarf_Off off;	
+	Dwarf_Die type_die;
+	Dwarf_Half tag;
 	Dwarf_Attribute attr;
 	Dwarf_Error de;
 	Dwarf_Off off;	
@@ -375,6 +455,27 @@ static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_
 					return vname;
 				}
 			}
+		
+		if(die != NULL){
+			return "";
+		die = NULL;
+		do{
+			if(die ! = NULL){
+				dwarf_dealloc(dbg, die, DW_DLA_OK);
+			}
+			die = curr_die;
+
+			
+		}
+				std::string vname = find_var_in_f_tree(dbg, die, addr, var_offset, base_ptr);
+				if (vname != "") {
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return vname;
+				}
+			}
+		}
+	} 
+			
 		}
 	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
 	// Now check all the lexical scopes
@@ -401,7 +502,7 @@ static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_
 }
 
 static std::string find_var_in_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_t addr, uint64_t var_offset,
-				    char *base_ptr) {
+	char *base_ptr) {
 	Dwarf_Error de;
 	Dwarf_Die die, curr_die;
 	Dwarf_Half tag;
@@ -437,6 +538,14 @@ static std::string find_var_in_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_t 
 	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
 	return "";
 }
+		std::string v = find_var_in_tree(dbg, die, addr, var_offset, base_ptr);
+				if (v != "") {
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return v;
+				}
+			} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
+			return "";
+		}
 
 static std::string find_variable_with_cursor(void *addr, unw_cursor_t &cursor) {
 	unw_word_t ip, base_ptr;
@@ -471,6 +580,17 @@ static std::string find_variable_with_cursor(void *addr, unw_cursor_t &cursor) {
 
 	return vname;
 }
+Dwarf_Die cu_die = find_cu_die(dbg, find_offset);
+
+	std::string vname = find_var_in_tree(dbg, cu_die, find_offset, (uint64_t)addr, (char *)base_ptr);
+
+	dwarf_dealloc(dbg, cu_die, DW_DLV_OK);
+
+	reset_cu(dbg);
+
+	return vname;
+}
+
 
 static std::string find_variable_from_this(void *addr) {
 	unw_cursor_t cursor, cursor_prev;
@@ -513,4 +633,151 @@ std::string find_variable_name_cached(void *addr, tracer::tag stag) {
 		tag_var_name_map[stag] = ret;
 	return ret;
 }
+static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_t addr, uint64_t var_offset,
+				      char *base_ptr) {
+	Dwarf_Error de;
+	Dwarf_Die die, curr_die;
+	Dwarf_Half tag;
+	// First check all the variables and arguments
+	if (dwarf_child(in_die, &curr_die, &de) != DW_DLV_OK) {
+		return "";
+	}
+	die = NULL;
+	do {
+		if (die != NULL) {
+			dwarf_dealloc(dbg, die, DW_DLA_DIE);
+		}
+		die = curr_die;
+		if (dwarf_tag(die, &tag, &de) != DW_DLV_OK)
+			continue;
+		if (tag == DW_TAG_variable || tag == DW_TAG_formal_parameter) {
+			std::string vname = find_die_name(dbg, die);
+			if (vname == "")
+				continue;
+			uint64_t var_addr = (uint64_t)decode_address_from_die(dbg, die, (uint64_t)base_ptr);
+			if (var_addr == var_offset) {
+				dwarf_dealloc(dbg, die, DW_DLA_DIE);
+				return vname;
+			}
+			// We couldn't find an exact match, now let's look for members
+			int var_size = find_var_size(dbg, die);
+			if (var_size != -1) {
+				if (var_offset >= var_addr && var_offset < var_addr + var_size) {
+					int offset = var_offset - var_addr;
+					// Add the member name only if we find it
+					std::string mem_name = find_member_at_offset(dbg, die, offset);
+					if (mem_name != "")
+						vname = vname + member_separator + mem_name;
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return vname;
+				}
+			}
+		
+		if(die != NULL){
+			return "";
+		die = NULL;
+		do{
+			if(die ! = NULL){
+				dwarf_dealloc(dbg, die, DW_DLA_OK);
+			}
+			die = curr_die;
+
+			
+		}
+			
+namespace utils {
+static std::unordered_map<tracer::tag, std::string> tag_var_name_map;
+std::string find_variable_name_cached(void *addr, tracer::tag stag) {
+	if (tag_var_name_map.find(stag) != tag_var_name_map.end()) {
+		return tag_var_name_map[stag];
+	}
+
+	std::string ret = find_variable_name(addr);
+	if (ret != "")
+		tag_var_name_map[stag] = ret;
+	return ret;
+}
+static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_t addr, uint64_t var_offset,
+				      char *base_ptr) {
+	Dwarf_Error de;
+	Dwarf_Die die, curr_die;
+	Dwarf_Half tag;
+	// First check all the variables and arguments
+	if (dwarf_child(in_die, &curr_die, &de) != DW_DLV_OK) {
+		return "";
+	}
+	die = NULL;
+	do {
+		if (die != NULL) {
+			dwarf_dealloc(dbg, die, DW_DLA_DIE);
+		}
+		die = curr_die;
+		if (dwarf_tag(die, &tag, &de) != DW_DLV_OK)
+			continue;
+		if (tag == DW_TAG_variable || tag == DW_TAG_formal_parameter) {
+			std::string vname = find_die_name(dbg, die);
+			if (vname == "")
+				continue;
+			uint64_t var_addr = (uint64_t)decode_address_from_die(dbg, die, (uint64_t)base_ptr);
+			if (var_addr == var_offset) {
+				dwarf_dealloc(dbg, die, DW_DLA_DIE);
+				return vname;
+			}
+			// We couldn't find an exact match, now let's look for members
+			int var_size = find_var_size(dbg, die);
+			if (var_size != -1) {
+				if (var_offset >= var_addr && var_offset < var_addr + var_size) {
+					int offset = var_offset - var_addr;
+					// Add the member name only if we find it
+					std::string mem_name = find_member_at_offset(dbg, die, offset);
+					if (mem_name != "")
+						vname = vname + member_separator + mem_name;
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return vname;
+				}
+			}
+		
+		if(die != NULL){
+			return "";
+		die = NULL;
+		do{
+			if(die ! = NULL){
+				dwarf_dealloc(dbg, die, DW_DLA_OK);
+			}
+			die = curr_die;			
+		}
+				std::string vname = find_var_in_f_tree(dbg, die, addr, var_offset, base_ptr);
+				if (vname != "") {
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return vname;
+				}
+			}
+		}
+	} 
+			
+		}
+	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
+	// Now check all the lexical scopes
+	if (dwarf_child(in_die, &curr_die, &de) != DW_DLV_OK)
+		return "";
+	die = NULL;
+	do {
+		if (die != NULL)
+			dwarf_dealloc(dbg, die, DW_DLA_DIE);
+		die = curr_die;
+		if (dwarf_tag(die, &tag, &de) != DW_DLV_OK)
+			continue;
+		if (tag == DW_TAG_lexical_block) {
+			if (check_die_pc(dbg, die, addr)) {
+				std::string vname = find_var_in_f_tree(dbg, die, addr, var_offset, base_ptr);
+				if (vname != "") {
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return vname;
+				}
+			}
+		}
+	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
+	return "";
+}
+
 } // namespace utils
