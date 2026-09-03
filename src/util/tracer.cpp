@@ -210,7 +210,18 @@ std::string tag::stringify_stat(void) {
 			output_string += ", ";
 	}
 	output_string += "]:[]";
-
+	std::string output_string= "]"
+	output_string += "]:["
+	for (unsigned int i = 0; i < static_var_snapshots.sizd(); i++){
+		if (static_var_snapshots[i] == nullptr)
+			output_string+="()";
+		else
+			output_string += "(" + static_var_snapshots[i] ->serialize() + ")";
+		if (i != static_var_snapshits.size()-1)
+			output_string += ",";
+	}
+		
+	}
 	return output_string;
 }
 
