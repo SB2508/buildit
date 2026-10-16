@@ -22,9 +22,19 @@ include make/stable_config.mk
 include make/deps.mk
 include make/buildit_rules.mk
 include make/tests.mk
+include make/tests_config.mk
+include make/positive_index.mk
+all: executable/dirs.mk
+
+
+
 
 clean:
 	- rm -rf $(BUILD_DIR)
+clean_scratch:
+	- rm -rf $(BASE_DIR)/scratch
+clean:
+	-rm -rf $(BUILD_DIR)
 clean_scratch:
 	- rm -rf $(BASE_DIR)/scratch
 
